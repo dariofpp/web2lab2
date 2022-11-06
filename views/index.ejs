@@ -1,0 +1,134 @@
+<html>
+  <head>
+    <%- include('partials/head') %>
+  </head>
+
+  <body class="px-40">
+    <div class="m-5 p-5 bg-gray-100 rounded-lg shadow-lg w-fit">
+      <p><b>JMBAG:</b> 0036523298</p>
+      <p><b>Ime i prezime:</b> Dario Franjic</p>
+      <p><b>Prva kategorija:</b> SQL injection</p>
+      <p><b>Druga kategorija:</b> CSRF</p>			
+    </div>
+
+    <div class="mt-10 flex flex-col">
+      <!-- ZADATAK #1 -->
+      <div>
+        <p class="text-4xl font-bold text-center">Prva kategorija: SQL injection</p>
+      </div>
+      <div class="bg-gray-100 rounded-lg m-5">
+        <form action="/" method="get" class="m-0 p-4">
+          <input type="checkbox" id="vulnerability" name="vulnerability" class="mb-10" <% if (sql_vulnerable) { %>checked<% } %> >
+          <label for="vulnerability">Vulnerability</label>
+
+          <div class="flex flex-row">
+            <div>
+              <p>Username:</p>
+              <input type="text" id="username" name="username" class="custom-textbox">
+              <input type="submit" value="Fetch" class="ml-5 custom-button">
+            </div>
+            <div class="ml-10 pl-10 border-l border-gray-300 h-full">
+              <p>Points:</p>
+              <div>
+                <p><%=points%></p>
+                <br/>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- ZADATAK #2 -->
+      <div class="mt-16">
+        <p class="text-4xl font-bold text-center">Druga kategorija: CSRF</p>
+      </div>
+      <div class="bg-gray-100 rounded-lg m-5 p-5">
+        <% if (!isLoggedIn) { %>
+          <div class="grid grid-rows-1 grid-cols-1">
+            <div>
+              <form action="/api/login" method="POST" class="my-0 mx-auto p-0 w-96">
+                <div class="grid grid-rows-2 grid-cols-2">
+                  <div class="my-auto text-center p-3">
+                    Username:
+                  </div>
+                  <div class="w-fit">
+                    <input type="text" id="username" name="username" class="custom-textbox m-3">
+                  </div>
+                  <div class="my-auto text-center p-3">
+                    Password:
+                  </div>
+                  <div class="w-fit ">
+                    <input type="password" id="password" name="password" class="custom-textbox m-3">
+                  </div>
+                </div>
+                <div class="w-full text-center mb-3">
+                  <input type="submit" value="Login" class="custom-button mx-auto"/>
+                </div>
+              </form>
+            </div>
+          </div>
+        <% } else { %>
+          <div>
+            <form action="/api/togglecsrf" method="GET">
+              <input type="submit" value="Turn <%=csrf_vulnerable?'off':'on'%> vulnerability" class="custom-button">
+            </form>
+            
+            <div class="mb-5">
+              <p><b>Logged in as:</b> <%=username%></p>
+              <p><b>Points:</b> <%=my_points%></p>
+              <a href="/api/logout">Logout</a>
+            </div>
+
+            <hr/>
+
+            <div class="flex flex-row my-5">
+              <p class="my-auto">Transfer points to:</p>
+              <form action="/api/transferpoints" class="p-0 m-0 ml-5">
+                <% if (csrf_vulnerable == false) { %> <input type="hidden" id="_csrf" name="_csrf" value="<%=csrfToken%>"> <% } %>
+                <input type="text" name="to" id="to" class="custom-textbox" placeholder="Username">
+                <input type="text" name="amount" id="amount" class="custom-textbox" placeholder="Amount">
+                <input type="submit" value="Transfer" class="custom-button">
+              </form>
+            </div>
+
+            <hr/>
+
+            <form action="/api/postimage" method="POST" class="mt-5">
+              <div class="flex flex-row">
+                <div class="grow">
+                  <input type="text" id="url" name="url" class="custom-textbox w-full" placeholder="Enter image url to post...">
+                </div>
+                <div>
+                  <input type="submit" value="Post" class="ml-5 custom-button">
+                </div>
+              </div>
+            </form>
+
+            <div class="flex flex-col">
+              <% for (var i = 0; i < images.length; i++) { %>
+                <div class="mt-8 flex flex-col bg-gray-200 p-5 rounded-lg">
+                  <div class="flex flex-row">
+                    <div class="grow font-bold mb-2">
+                      @<%=images[i].username%>
+                    </div>
+                    <% if (images[i].userid == my_id) { %>
+                      <div>
+                        <form action="/api/deleteimage" method="POST">
+                          <input type="hidden" id="id" name="id" value="<%=images[i].imgid%>">
+                          <input type="submit" value="Delete" class="custom-button">
+                        </form>
+                      </div>
+                    <% } %>
+                  </div>
+                  <div>
+                    <img src="<%=images[i].url%>"/>
+                  </div>
+                </div>
+              <% } %>
+            </div>
+          </div>
+        <% } %>
+      </div>
+    </div>
+  </body>
+</html>
